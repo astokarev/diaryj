@@ -4,7 +4,6 @@ import android.graphics.text.LineBreaker;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Html;
-import android.text.Layout;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -15,25 +14,24 @@ import android.widget.TextView;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-public class MainActivity extends AppCompatActivity implements OnClickListener {
+public class MainActivity extends AppCompatActivity implements OnClickListener, com.example.diaryj.View {
+    private Presenter presenter = new Presenter(this);
     EditText editText;
-    Button button;
+    Button saveButton;
     LinearLayout noteList;
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
         editText = findViewById(R.id.editText);
         editText.setBreakStrategy(LineBreaker.BREAK_STRATEGY_SIMPLE);
-        button = findViewById(R.id.button);
-        button.setEnabled(false);
-        noteList = findViewById(R.id.noteList1);
-        button.setOnClickListener(this);
+        saveButton = findViewById(R.id.saveButton);
+        saveButton.setEnabled(false);
+        noteList = findViewById(R.id.noteCntnr);
+        saveButton.setOnClickListener(this);
         editText.setOnClickListener(this);
 
     }
@@ -41,16 +39,24 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.button:
-                TextView note = new TextView(this);
-                Date date = new Date();
-                SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss");
-                noteList.addView(note);
-                String dateText = "<strong>"+dateFormat.format(date)+"</strong>"+" "+ editText.getText();
-                note.setText(Html.fromHtml(dateText));
-                editText.getText().clear();
+            case R.id.saveButton:
+                String noteText = editText.getText().toString();
+                presenter.onSaveClick(noteText);
             case R.id.editText:
-                button.setEnabled(true);
+                saveButton.setEnabled(true);
         }
+
+    }
+
+    @Override
+    public void addNote2List(String noteText) {
+        TextView note = new TextView(this);
+        noteList.addView(note);
+        note.setText(Html.fromHtml(noteText));
+    }
+
+    @Override
+    public void clearInput() {
+        editText.getText().clear();
     }
 }
